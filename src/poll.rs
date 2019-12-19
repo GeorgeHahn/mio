@@ -1150,6 +1150,18 @@ impl Poll {
         ret
     }
 
+    /// Notify the event loop of an externally-imposed sleep. This is only
+    /// applicable to event loops that do not park the thread in mio. An
+    /// example of such an event loop would be a tokio runtime that never
+    /// parks, but is `turn`-ed periodically.
+    ///
+    /// This function only sets the sleep marker if the readiness queue is
+    /// empty. Call `turn` until this function returns true. (TODO/HACK)
+    #[inline]
+    pub fn external_sleep(&self) -> bool {
+        self.readiness_queue.prepare_for_sleep()
+    }
+
     #[inline]
     #[cfg_attr(feature = "cargo-clippy", allow(clippy::if_same_then_else))]
     fn poll2(&self, events: &mut Events, mut timeout: Option<Duration>, interruptible: bool) -> io::Result<usize> {
